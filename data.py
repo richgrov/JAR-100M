@@ -1,12 +1,13 @@
 import random as rand
 import numpy as np
 
+TRAIN_SPLIT = 0.9
+
 class Data:
     data = None
     vocab = None
     training_list = None
     validate_list = None
-    TRAIN_SPLIT = None
     
     def __init__(self, file_name: str):
         global data
@@ -14,7 +15,6 @@ class Data:
         global training_list
         global validate_list
         global TRAIN_SPLIT
-        TRAIN_SPLIT = 0.9
         file = open(file_name, 'r')
         data = file.read()
         vocab = set(data)
@@ -24,7 +24,7 @@ class Data:
 
     def getRandomContextWindow(self, context_size: int):
         random_position = rand.randint(0, len(training_list) - 1)
-        random_slice = np.array([data[random_position: random_position + context_size + 1]])
+        random_slice = np.array([data[random_position: random_position + context_size], data[random_position + context_size]])
         # for idx in range(context_size):
         #     inputs = []
         #     for idx_2 in range(idx + 1):
