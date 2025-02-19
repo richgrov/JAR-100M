@@ -48,9 +48,6 @@ def main():
     this = thing.getRandomContextWindow(CONTEXT_WINDOW_SIZE)
     that = thing.randomVecsInVocab(CONTEXT_WINDOW_SIZE)
     
-    # print(this[0][0])
-    # print(that[this[0][0]])
-    # print(np.dot())
     mat1 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
     mat2 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
     mat3 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
@@ -65,22 +62,12 @@ def main():
             array_thing.append(np.dot(that[this[0][j]], those[this[0][i]]))
         things.append(np.array(array_thing))
     things = np.array(things)
-    # print(things[0])
     for column in range(len(things)):
         for what in range(len(things)):
             if what > column:
                 things[column][what] = -1000
         things[column] = softMax(things[column], 5)
         print(things[column])
-    # for i in range(len(this)):
-    #     print(len(this[i][0]))
-    # print(this)
-    # print(that)
-    
-    # for idx in range(len(shakespear)):
-    #     print(shakespear[idx-31:idx+32])
-    # print(randomized_vocab_vectors)
-    # print(vocab)
 
 def multiplyMatrix(vector: list, matrix: list):
     new_vector = []
