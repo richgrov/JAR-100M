@@ -1,7 +1,46 @@
 import random as rand
+from jax import grad
+import jax.numpy as np
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
+EPOCHS = 500
+LEARNING_RATE = 0.01
+
+dataset = [[x/20] for x in range(20)]
+inputs = np.array(dataset)
+outputs = np.array(dataset)
+
+def model(params, inp):
+    weights, biases = params
+    return np.dot(inp, weights) + biases
+
+def mse(predictions, actual):
+    return np.mean((predictions - actual) ** 2)
+
+def loss_fn(params, inp, expected_outp):
+    predictions = model(params, inp)
+    return mse(predictions, expected_outp)
+
+params = (np.array([0.5]), np.array([0.5]))
+
+for _ in range(EPOCHS):
+    total_loss = 0
+    for i, inp in enumerate(inputs):
+        expected_outp = outputs[i]
+        grads = grad(loss_fn)(params, inp, expected_outp)
+        weights, biases = params
+
+        params = (
+            weights - LEARNING_RATE * grads[0],
+            biases - LEARNING_RATE * grads[1],
+        )
+        
+        loss = loss_fn(params, inp, expected_outp)
+        total_loss += loss
+        print(params[0], params[1])
+
+    print(f"Average Loss: {total_loss/len(inputs)}")
 
 def main():
     file = open("dataset.txt", 'r')
