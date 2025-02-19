@@ -44,29 +44,29 @@ for _ in range(EPOCHS):
     print(f"Average Loss: {total_loss/len(inputs)}")
 
 def main():
-    thing = Data("dataset.txt")
-    this = thing.getRandomContextWindow(CONTEXT_WINDOW_SIZE)
-    that = thing.randomVecsInVocab(CONTEXT_WINDOW_SIZE)
+    data = Data("dataset.txt")
+    rand_window = data.getRandomContextWindow(CONTEXT_WINDOW_SIZE)
+    rand_vec_vocab = data.randomVecsInVocab(CONTEXT_WINDOW_SIZE)
     
     mat1 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
     mat2 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
     mat3 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
-    those = dict.copy(that)
+    rand_vec_copy = dict.copy(rand_vec_vocab)
     things = []
     for i in range(CONTEXT_WINDOW_SIZE):
-        that[this[0][i]] = multiplyMatrix(that[this[0][i]], mat1)
-        those[this[0][i]] = multiplyMatrix(those[this[0][i]], mat2)
+        rand_vec_vocab[rand_window[i]] = multiplyMatrix(rand_vec_vocab[rand_window[i]], mat1)
+        rand_vec_copy[rand_window[i]] = multiplyMatrix(rand_vec_copy[rand_window[i]], mat2)
     for i in range(CONTEXT_WINDOW_SIZE):
         array_thing = []
         for j in range(CONTEXT_WINDOW_SIZE):
-            array_thing.append(np.dot(that[this[0][j]], those[this[0][i]]))
+            array_thing.append(np.dot(rand_vec_vocab[rand_window[i]], rand_vec_copy[rand_window[j]]))
         things.append(np.array(array_thing))
     things = np.array(things)
     for column in range(len(things)):
         for what in range(len(things)):
             if what > column:
-                things[column][what] = -1000
-        things[column] = softMax(things[column], 5)
+                things.at[column].set(-1000)
+        things.at[column].set(softMax(things[column], 5))
         print(things[column])
 
 def multiplyMatrix(vector: list, matrix: list):
@@ -76,16 +76,16 @@ def multiplyMatrix(vector: list, matrix: list):
         for column in range(len(vector)):
             sum += matrix[row][column] * vector[column]
         new_vector.append(sum)
-    return new_vector
+    return np.array(new_vector)
 
 def makeMatrix(cw: int, rows: int) -> list:
     matrix = []
-    for j in range(rows):
+    for _ in range(rows):
         row = []
-        for i in range(cw):
+        for _ in range(cw):
             row.append(rand.uniform(-1.0, 1.0))
         matrix.append(row)
-    return matrix
+    return np.array(matrix)
 
 def softMax(values: list, temperature: float=1):
     positive_list = []
