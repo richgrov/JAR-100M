@@ -1,11 +1,11 @@
 import random as rand
 import jax.numpy as np
+from jax import random
 
 TRAIN_SPLIT = 0.9
 
 class Data:
     def __init__(self, file_name: str):
-        # global TRAIN_SPLIT
         file = open(file_name, 'r')
         self.data = file.read()
         self.vocab = set(self.data)
@@ -23,10 +23,10 @@ class Data:
         return [data[i] for i in range(random_position, random_position + context_size)]
 
     def randomVecsInVocab(self, context_size: int):
-        randomized_vocab_vectors = {}
-        for character in self.vocab:
-            random_vec = []
-            for _ in range(context_size):
-                random_vec.append(rand.uniform(-1.0, 1.0))
-            randomized_vocab_vectors[character] = np.array(random_vec)
+        key = random.PRNGKey(0)
+        keys = random.split(key, len(self.vocab))
+        randomized_vocab_vectors = {
+            char: random.uniform(keys[i], shape=(1, context_size), minval=-1.0, maxval=1.0)
+            for i, char in enumerate(self.vocab)
+        }
         return randomized_vocab_vectors
