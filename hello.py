@@ -4,12 +4,19 @@ import jax.numpy as np
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
-EPOCHS = 500
+EPOCHS = 100
 LEARNING_RATE = 0.01
 
-dataset = [[x/20] for x in range(20)]
-inputs = np.array(dataset)
-outputs = np.array(dataset)
+input_array = []
+output_array = []
+
+for x in range(20):
+    for y in range(20):
+        input_array.append([x/20, y/20])
+        output_array.append([(x/20+y/20)/2+1.0])
+
+inputs = np.array(input_array)
+outputs = np.array(output_array)
 
 def model(params, inp):
     weights, biases = params
@@ -22,7 +29,7 @@ def loss_fn(params, inp, expected_outp):
     predictions = model(params, inp)
     return mse(predictions, expected_outp)
 
-params = (np.array([0.5]), np.array([0.5]))
+params = (np.array([1.0, 1.0]), np.array([1.0]))
 
 for _ in range(EPOCHS):
     total_loss = 0
@@ -66,5 +73,5 @@ def main():
     print(vocab)
 
 
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+    #main()
