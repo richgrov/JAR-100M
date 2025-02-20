@@ -5,7 +5,7 @@ from jax.example_libraries import optimizers
 
 from jar100m.dataset import Dataset
 from jar100m.functions import relu, mse
-from jar100m.layers import fully_connected
+from jar100m.layers import *
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
