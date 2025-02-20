@@ -1,11 +1,10 @@
 from jax import grad
 import jax.numpy as np
 from jax.example_libraries import optimizers
-from jax.nn import softmax
 import jax.random
 
 from jar100m.dataset import Dataset
-from jar100m.functions import relu, mse
+from jar100m.functions import *
 from jar100m.layers import *
 
 TRAIN_SPLIT = 0.9
@@ -40,8 +39,8 @@ def generate(params, x: np.ndarray, n):
     return x
 
 def loss_fn(params, inp, expected_outp):
-    predictions = model(params, inp)
-    return mse(predictions, expected_outp)
+    logits = model(params, inp)
+    return cross_entropy_loss(logits, expected_outp)
 
 params = embedding(len(dataset.vocab), len(dataset.vocab))
 
