@@ -12,15 +12,20 @@ LEARNING_RATE = 0.01
 
 dataset = Dataset()
 
-def model(params, inp):
-    weights, biases = params
-    return relu(np.dot(inp, weights) + biases)
+def model(params, x):
+    for weights, biases in params:
+        x = relu(np.dot(x, weights) + biases)
+
+    return x
 
 def loss_fn(params, inp, expected_outp):
     predictions = model(params, inp)
     return mse(predictions, expected_outp)
 
-params = (np.array([1.0, 1.0]), np.array([1.0]))
+params = [
+    (np.array([1.0, 1.0]), np.array([1.0])),
+    (np.array([[0.5]]), np.array([0.69])),
+]
 
 for _ in range(EPOCHS):
     total_loss = 0
@@ -28,13 +33,14 @@ for _ in range(EPOCHS):
         inp, expected_outp = dataset[i]
 
         grads = grad(loss_fn)(params, inp, expected_outp)
-        print(grads)
-        weights, biases = params
 
-        params = (
-            weights - LEARNING_RATE * grads[0],
-            biases - LEARNING_RATE * grads[1],
-        )
+        for i in range(len(params)):
+            weight_grads, bias_grads = grads[i]
+            weights, biases = params[i]
+            params[i] = (
+                weights - LEARNING_RATE * weight_grads,
+                biases - LEARNING_RATE * bias_grads,
+            )
         
         loss = loss_fn(params, inp, expected_outp)
         total_loss += loss
