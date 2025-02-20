@@ -4,6 +4,7 @@ import jax.numpy as np
 
 from jar100m.dataset import Dataset
 from jar100m.functions import relu, mse
+from jar100m.layers import fully_connected
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
@@ -23,8 +24,8 @@ def loss_fn(params, inp, expected_outp):
     return mse(predictions, expected_outp)
 
 params = [
-    (np.array([1.0, 1.0]), np.array([1.0])),
-    (np.array([[0.5]]), np.array([0.69])),
+    fully_connected(2, 2),
+    fully_connected(2, 1),
 ]
 
 for _ in range(EPOCHS):
