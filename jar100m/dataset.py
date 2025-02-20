@@ -20,7 +20,7 @@ class Dataset:
         self.outputs = np.array(outputs)
 
     def encode(self, text: str) -> List[int]:
-        return [self.char_id_map[char] for char in text]
+        return np.array([self.char_id_map[char] for char in text])
 
     def decode(self, ids) -> str:
         return "".join([self.id_char_map[id] for id in ids])
@@ -30,4 +30,3 @@ class Dataset:
 
     def __len__(self):
         return len(self.inputs)
-
