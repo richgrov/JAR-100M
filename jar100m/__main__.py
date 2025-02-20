@@ -1,26 +1,21 @@
 import random as rand
 from jax import grad
 import jax.numpy as np
+from jar100m.dataset import Dataset
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
 EPOCHS = 100
 LEARNING_RATE = 0.01
 
-input_array = []
-output_array = []
+dataset = Dataset()
 
-for x in range(20):
-    for y in range(20):
-        input_array.append([x/20, y/20])
-        output_array.append([(x/20+y/20)/2+1.0])
-
-inputs = np.array(input_array)
-outputs = np.array(output_array)
+def relu(x):
+    return np.maximum(x, 0)
 
 def model(params, inp):
     weights, biases = params
-    return np.dot(inp, weights) + biases
+    return relu(np.dot(inp, weights) + biases)
 
 def mse(predictions, actual):
     return np.mean((predictions - actual) ** 2)
@@ -33,9 +28,11 @@ params = (np.array([1.0, 1.0]), np.array([1.0]))
 
 for _ in range(EPOCHS):
     total_loss = 0
-    for i, inp in enumerate(inputs):
-        expected_outp = outputs[i]
+    for i in range(len(dataset)):
+        inp, expected_outp = dataset[i]
+
         grads = grad(loss_fn)(params, inp, expected_outp)
+        print(grads)
         weights, biases = params
 
         params = (
@@ -46,8 +43,6 @@ for _ in range(EPOCHS):
         loss = loss_fn(params, inp, expected_outp)
         total_loss += loss
         print(params[0], params[1])
-
-    print(f"Average Loss: {total_loss/len(inputs)}")
 
 def main():
     file = open("dataset.txt", 'r')
