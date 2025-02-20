@@ -9,7 +9,7 @@ from jar100m.layers import fully_connected
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
-EPOCHS = 100
+EPOCHS = 10
 LEARNING_RATE = 0.01
 
 with open("dataset.txt", 'r') as file:
