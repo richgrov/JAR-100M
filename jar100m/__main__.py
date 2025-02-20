@@ -19,7 +19,7 @@ spliceIndex = int(len(shakespeare) * TRAIN_SPLIT)
 train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
-dataset = Dataset(shakespeare)
+dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
 
 def model(params, x):
     for weights, biases in params:

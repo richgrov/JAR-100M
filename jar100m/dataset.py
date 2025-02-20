@@ -2,22 +2,12 @@ from typing import List, Tuple
 import jax.numpy as np
 
 class Dataset:
-    def __init__(self, text) -> None:
+    def __init__(self, text: str, context_window: int) -> None:
         self.id_char_map = list(set(text))
         self.char_id_map = { char: id for id, char in enumerate(self.id_char_map) }
 
-        self.text = self.encode(text)
-        
-        inputs = []
-        outputs = []
-
-        for x in range(20):
-            for y in range(20):
-                inputs.append([x/20, y/20])
-                outputs.append([(x/20+y/20)/2+1.0])
-
-        self.inputs = np.array(inputs)
-        self.outputs = np.array(outputs)
+        self.encoded_text = self.encode(text)
+        self.context_window = context_window
 
     def encode(self, text: str) -> List[int]:
         return np.array([self.char_id_map[char] for char in text])
@@ -25,8 +15,16 @@ class Dataset:
     def decode(self, ids) -> str:
         return "".join([self.id_char_map[id] for id in ids])
 
+    @property
+    def vocab(self):
+        return self.id_char_map
+
     def __getitem__(self, index: int) -> Tuple[np.ndarray, np.ndarray]:
-        return (self.inputs[index], self.outputs[index])
+        window = index // self.context_window
+        window_len = index % self.context_window + 1
+        return (np.array(self.encoded_text[window:window+window_len]), self.encoded_text[window+window_len])
 
     def __len__(self):
-        return len(self.inputs)
+        windows = (len(self.encoded_text) - self.context_window - 1)
+        return windows * self.context_window
+
