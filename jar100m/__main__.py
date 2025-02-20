@@ -1,6 +1,7 @@
 import random as rand
 from jax import grad
 import jax.numpy as np
+from jax.example_libraries import optimizers
 
 from jar100m.dataset import Dataset
 from jar100m.functions import relu, mse
@@ -28,20 +29,17 @@ params = [
     fully_connected(2, 1),
 ]
 
+adam_init, adam_update, get_params = optimizers.adam(LEARNING_RATE)
+optimizer_state = adam_init(params)
+
 for _ in range(EPOCHS):
     total_loss = 0
     for i in range(len(dataset)):
         inp, expected_outp = dataset[i]
 
         grads = grad(loss_fn)(params, inp, expected_outp)
-
-        for i in range(len(params)):
-            weight_grads, bias_grads = grads[i]
-            weights, biases = params[i]
-            params[i] = (
-                weights - LEARNING_RATE * weight_grads,
-                biases - LEARNING_RATE * bias_grads,
-            )
+        optimizer_state = adam_update(0, grads, optimizer_state)
+        params = get_params(optimizer_state)
         
         loss = loss_fn(params, inp, expected_outp)
         total_loss += loss
