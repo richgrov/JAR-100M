@@ -12,7 +12,14 @@ CONTEXT_WINDOW_SIZE = 64
 EPOCHS = 100
 LEARNING_RATE = 0.01
 
-dataset = Dataset()
+with open("dataset.txt", 'r') as file:
+    shakespeare = file.read()
+
+spliceIndex = int(len(shakespeare) * TRAIN_SPLIT)
+train = shakespeare[:spliceIndex]
+validate = shakespeare[spliceIndex:]
+
+dataset = Dataset(train)
 
 def model(params, x):
     for weights, biases in params:
@@ -42,32 +49,5 @@ for _ in range(EPOCHS):
         params = get_params(optimizer_state)
         
         loss = loss_fn(params, inp, expected_outp)
-        total_loss += loss
-        print(params[0], params[1])
-
-def main():
-    file = open("dataset.txt", 'r')
-    shakespear = file.read()
-    spliceIndex = int(len(shakespear) * TRAIN_SPLIT)
-
-    first = shakespear[:spliceIndex]
-    last = shakespear[spliceIndex:]
-    
-    vocab = set(shakespear)
-    
-    randomized_vocab_vectors = {}
-    
-    for character in vocab:
-        random_vec = []
-        for vec_idx in range(63):
-            random_vec.append(rand.uniform(-1.0, 1.0))
-        randomized_vocab_vectors[character] = random_vec
-    
-    # for idx in range(len(shakespear)):
-    #     print(shakespear[idx-31:idx+32])
-    print(randomized_vocab_vectors)
-    print(vocab)
-
-
-#if __name__ == "__main__":
-    #main()
+    total_loss += loss
+    print(total_loss/len(dataset))
