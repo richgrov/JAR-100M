@@ -1,7 +1,9 @@
 import random as rand
 from jax import grad
 import jax.numpy as np
+
 from jar100m.dataset import Dataset
+from jar100m.functions import relu, mse
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 64
@@ -10,15 +12,9 @@ LEARNING_RATE = 0.01
 
 dataset = Dataset()
 
-def relu(x):
-    return np.maximum(x, 0)
-
 def model(params, inp):
     weights, biases = params
     return relu(np.dot(inp, weights) + biases)
-
-def mse(predictions, actual):
-    return np.mean((predictions - actual) ** 2)
 
 def loss_fn(params, inp, expected_outp):
     predictions = model(params, inp)
