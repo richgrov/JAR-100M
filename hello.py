@@ -1,8 +1,7 @@
-import random as rand
-from jax import grad
+from jax import grad, random
 import jax.numpy as np
-from data import Data
-import math
+import numpy as nmp
+from jar100m.dataset import Dataset
 
 CONTEXT_WINDOW_SIZE = 64
 EPOCHS = 500
@@ -44,61 +43,54 @@ for _ in range(EPOCHS):
     print(f"Average Loss: {total_loss/len(inputs)}")
 
 def main():
-    data = Data("dataset.txt")
+    data = Dataset("dataset.txt", CONTEXT_WINDOW_SIZE)
     rand_window = data.getRandomContextWindow(CONTEXT_WINDOW_SIZE)
     rand_vec_vocab = data.randomVecsInVocab(CONTEXT_WINDOW_SIZE)
+    print(rand_window)
+    print(rand_vec_vocab)
+    # rand_window_copy = list.copy(rand_window)
     
-    mat1 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
-    mat2 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
-    mat3 = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
-    rand_vec_copy = dict.copy(rand_vec_vocab)
-    things = []
-    for i in range(CONTEXT_WINDOW_SIZE):
-        rand_vec_vocab[rand_window[i]] = multiplyMatrix(rand_vec_vocab[rand_window[i]], mat1)
-        rand_vec_copy[rand_window[i]] = multiplyMatrix(rand_vec_copy[rand_window[i]], mat2)
-    for i in range(CONTEXT_WINDOW_SIZE):
-        array_thing = []
-        for j in range(CONTEXT_WINDOW_SIZE):
-            array_thing.append(np.dot(rand_vec_vocab[rand_window[i]], rand_vec_copy[rand_window[j]]))
-        things.append(np.array(array_thing))
-    things = np.array(things)
-    for column in range(len(things)):
-        for what in range(len(things)):
-            if what > column:
-                things.at[column].set(-1000)
-        things.at[column].set(softMax(things[column], 5))
-        print(things[column])
+    # query_matrix = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
+    # key_matrix = nmp.array(makeMatrix(CONTEXT_WINDOW_SIZE, 8))
+    # value_matrix = makeMatrix(CONTEXT_WINDOW_SIZE, 8)
+    # temp = [[0] for _ in range(CONTEXT_WINDOW_SIZE)]
+    # window = []
+    # for _ in range(CONTEXT_WINDOW_SIZE):
+    #     temp = []
+    #     for _ in range(CONTEXT_WINDOW_SIZE):
+    #         temp.append(0)
+    #     window.append(temp)
+    # key_vector = list.copy(temp)
+    # query_vector = list.copy(temp)
+    # for i in range(CONTEXT_WINDOW_SIZE):
+    #     vec = rand_vec_vocab[rand_window[i]]
+    #     print(key_matrix.shape)
+    #     print(vec.shape)
+    #     query_vector[i] = nmp.array(multiplyMatrix(query_matrix, vec))
+    #     key_vector[i] = nmp.array(multiplyMatrix(key_matrix, vec))
+    #     print(key_vector[i])
+    # for i in range(CONTEXT_WINDOW_SIZE):
+    #     for j in range(CONTEXT_WINDOW_SIZE):
+    #         window[i][j] = dot(key_vector[i], query_vector[j])
+    #         # print(window[i][j])
+    # for column in range(CONTEXT_WINDOW_SIZE):
+    #     thing = None
+    #     for what in range(CONTEXT_WINDOW_SIZE):
+    #         if what > column:
+    #             window[column][what] = -1000000.0
+    #     thing = softMax(window[column])
+    #     window[column] = thing[0]
+    # for i in range(len(window)):
+    #     for j in range(len(window[0])):
+    #         print(window[i][j])
+    
+    # #     print(things[column])
 
-def multiplyMatrix(vector: list, matrix: list):
-    new_vector = []
-    for row in range(len(matrix)):
-        sum = 0
-        for column in range(len(vector)):
-            sum += matrix[row][column] * vector[column]
-        new_vector.append(sum)
-    return np.array(new_vector)
-
-def makeMatrix(cw: int, rows: int) -> list:
-    matrix = []
-    for _ in range(rows):
-        row = []
-        for _ in range(cw):
-            row.append(rand.uniform(-1.0, 1.0))
-        matrix.append(row)
-    return np.array(matrix)
-
-def softMax(values: list, temperature: float=1):
-    positive_list = []
-    length = len(values)
-    for i in range(length):
-        positive_list.append(np.pow(math.e, values[i]/temperature))
-    new_values = []
-    sum = 0
-    for i in range(length):
-        sum += positive_list[i]
-    for i in range(length):
-        new_values.append(positive_list[i]/sum)
-    return new_values
+# def softMax(values: list, temperature: float=1):
+#     values = np.array(values)
+#     values = values - np.max(values)
+#     exp_values = np.exp(values / temperature)
+#     return (exp_values / np.sum(exp_values)).tolist()
 
 if __name__ == "__main__":
     main()
