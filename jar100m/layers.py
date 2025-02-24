@@ -11,5 +11,8 @@ def fully_connected(num_in, num_out) -> Tuple[np.ndarray, np.ndarray]:
         jax.random.uniform(rng, (num_out,)),
     )
 
+def makeMatrix(cw: int, rows: int) -> np.ndarray:
+    return jax.random.uniform(rng, shape=(rows, cw), minval=-1.0, maxval=1.0)
+
 def embedding(num_embeddings: int, embed_dim: int) -> np.ndarray:
     return jax.random.uniform(rng, (num_embeddings, embed_dim))
