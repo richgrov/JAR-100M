@@ -49,7 +49,7 @@ for _ in range(EPOCHS):
 def generate(sequence, n):
     for _ in range(n):
         logits = model(sequence[-1])
-        probs = F.softmax(logits)
+        probs = F.softmax(logits, dim=0)
         next = torch.multinomial(probs, num_samples=1)
         sequence = torch.cat((sequence, next))
 
