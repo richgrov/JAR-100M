@@ -43,7 +43,6 @@ for _ in range(EPOCHS):
         loss.backward()
         optimizer.step()
 
-    total_loss += loss
     print(total_loss/len(dataset))
 
 def generate(sequence, n):
