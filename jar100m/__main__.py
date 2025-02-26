@@ -1,19 +1,22 @@
 import torch
 from torch import nn
+import torch.nn.functional as F
 from torch.optim import Adam
 
+from jar100m.dataset import Dataset
+
 TRAIN_SPLIT = 0.9
-CONTEXT_WINDOW_SIZE = 1
+CONTEXT_WINDOW_SIZE = 3
 EPOCHS = 10
-LEARNING_RATE = 0.01
 
 class Model(nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, vocab_len: int) -> None:
         super().__init__()
-        self.linear = nn.Linear(2, 1)
+        self.embedding = nn.Embedding(vocab_len, vocab_len)
 
     def forward(self, x):
-        return self.linear(x)
+        logits = self.embedding(x)
+        return logits
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
@@ -22,30 +25,18 @@ spliceIndex = int(len(shakespeare) * TRAIN_SPLIT)
 train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
-loss_fn = nn.MSELoss()
-model = Model()
-optimizer = Adam(model.parameters(), lr=0.1)
+dataset = Dataset(shakespeare[:50000], CONTEXT_WINDOW_SIZE)
 
-"""
-dataset = Dataset(shakespeare[:1000], CONTEXT_WINDOW_SIZE)
-rng = jax.random.key(0)
-"""
-
-inputs = []
-outputs = []
-for i in range(100):
-    for j in range(100):
-        inputs.append(torch.tensor([i/100, j/100]))
-        outputs.append(torch.tensor([(i/100 + j/100)/2]))
+model = Model(len(dataset.vocab))
+optimizer = Adam(model.parameters(), lr=0.01)
 
 for _ in range(EPOCHS):
     total_loss = 0
-    for i in range(len(inputs)):
-        #inp, expected_outp = dataset[i]
-        inp = inputs[i]
-        pred = model(inp)
+    for i in range(len(dataset)):
+        inp, expected_outp = dataset[i]
+        pred_logits = model(inp)
 
-        loss = loss_fn(pred, outputs[i])
+        loss = F.cross_entropy(pred_logits, expected_outp)
         total_loss += loss.item()
 
         model.zero_grad()
@@ -53,11 +44,17 @@ for _ in range(EPOCHS):
         optimizer.step()
 
     total_loss += loss
-    print(total_loss/len(inputs))
+    print(total_loss/len(dataset))
 
-with torch.no_grad():
-    a = float(input())
-    b = float(input())
-    inp = torch.tensor([a, b])
-    out = model(inp)
-    print(out)
+def generate(sequence, n):
+    for _ in range(n):
+        logits = model(sequence[-1])
+        probs = F.softmax(logits)
+        next = torch.multinomial(probs, num_samples=1)
+        sequence = torch.cat((sequence, next))
+
+    return sequence
+
+inp = dataset.encode("\n")
+outp = generate(inp, 20)
+print(dataset.decode(outp))
