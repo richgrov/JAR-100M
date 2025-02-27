@@ -7,8 +7,8 @@ from jar100m.device import device
 from jar100m.model import Model
 
 TRAIN_SPLIT = 0.9
-CONTEXT_WINDOW_SIZE = 3
-EPOCHS = 10
+CONTEXT_WINDOW_SIZE = 8
+EPOCHS = 5
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
