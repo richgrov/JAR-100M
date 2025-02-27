@@ -9,6 +9,7 @@ from jar100m.model import Model
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 8
 EPOCHS = 5
+LOSS_REPORT_INTERVAL = 10000
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
@@ -17,25 +18,29 @@ spliceIndex = int(len(shakespeare) * TRAIN_SPLIT)
 train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
-dataset = Dataset(shakespeare[:50000], CONTEXT_WINDOW_SIZE)
+dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
 
-for _ in range(EPOCHS):
+for epoch in range(EPOCHS):
     total_loss = 0
-    for i in range(len(dataset)):
+
+    for i in range(100000):
         inp, expected_outp = dataset[i]
         pred_logits = model(inp)
 
         loss = F.cross_entropy(pred_logits, expected_outp)
         total_loss += loss.item()
 
+        if i % LOSS_REPORT_INTERVAL == 0 and i > 0:
+            average_loss = total_loss / LOSS_REPORT_INTERVAL
+            print(f"Epoch {epoch}, step {i}: loss {average_loss}")
+            total_loss = 0
+
         model.zero_grad()
         loss.backward()
         optimizer.step()
-
-    print(total_loss/len(dataset))
 
 def generate(sequence, n):
     for _ in range(n):
