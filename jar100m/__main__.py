@@ -55,5 +55,5 @@ def generate(sequence, n):
     return sequence
 
 inp = dataset.encode("\n")
-outp = generate(inp, 20)
+outp = generate(inp, 1000)
 print(dataset.decode(outp))
