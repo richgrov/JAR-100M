@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
+from torch.utils.data import DataLoader, random_split
 
 from jar100m.dataset import Dataset
 from jar100m.device import device
@@ -19,6 +20,8 @@ train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
 dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
+train_data, validate_data, _ = random_split(dataset, [0.01, 0.01, 0.98])
+train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
