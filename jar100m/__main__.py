@@ -23,6 +23,9 @@ dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
 
+num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+print(f"Model has {num_params} parameters")
+
 for epoch in range(EPOCHS):
     total_loss = 0
 
