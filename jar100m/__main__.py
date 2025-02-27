@@ -20,7 +20,7 @@ validate = shakespeare[spliceIndex:]
 dataset = Dataset(shakespeare[:50000], CONTEXT_WINDOW_SIZE)
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
-optimizer = Adam(model.parameters(), lr=0.01)
+optimizer = Adam(model.parameters(), lr=0.001)
 
 for _ in range(EPOCHS):
     total_loss = 0
