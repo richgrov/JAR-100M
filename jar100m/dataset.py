@@ -1,6 +1,8 @@
 from typing import Tuple
 import torch
 
+from jar100m.device import device
+
 class Dataset:
     def __init__(self, text: str, context_window: int) -> None:
         self.id_char_map = list(set(text))
@@ -10,7 +12,7 @@ class Dataset:
         self.context_window = context_window
 
     def encode(self, text: str) -> torch.Tensor:
-        return torch.tensor([self.char_id_map[char] for char in text])
+        return torch.tensor([self.char_id_map[char] for char in text], device=device)
 
     def decode(self, ids) -> str:
         return "".join([self.id_char_map[id] for id in ids])

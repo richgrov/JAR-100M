@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 
 from jar100m.dataset import Dataset
+from jar100m.device import device
 
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 3
@@ -27,7 +28,7 @@ validate = shakespeare[spliceIndex:]
 
 dataset = Dataset(shakespeare[:50000], CONTEXT_WINDOW_SIZE)
 
-model = Model(len(dataset.vocab))
+model = Model(len(dataset.vocab)).to(device)
 optimizer = Adam(model.parameters(), lr=0.01)
 
 for _ in range(EPOCHS):
