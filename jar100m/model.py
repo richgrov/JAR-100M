@@ -4,6 +4,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
+from jar100m.device import device
+
 EMBED_DIMENSIONS = 16
 
 class SingleHeadSelfAttention(nn.Module):
@@ -15,7 +17,7 @@ class SingleHeadSelfAttention(nn.Module):
         self.key = nn.Linear(in_size, head_size, bias=False)
         self.value = nn.Linear(in_size, head_size, bias=False)
 
-        affinity_tri = torch.tril(torch.ones(context_window_len, context_window_len)) == 0
+        affinity_tri = torch.tril(torch.ones(context_window_len, context_window_len, device=device)) == 0
         self.register_buffer("affinity_tri", affinity_tri)
 
     def forward(self, x: torch.Tensor):
@@ -65,7 +67,10 @@ class Model(nn.Module):
         num_toks = x.shape[0]
 
         embedding = self.info_embedding(x[-self.context_window_len:])
-        position_embeddings = self.position_embedding(torch.arange(min(num_toks, self.context_window_len)))
+        arange = torch.arange(min(num_toks, self.context_window_len), device=device)
+        position_embeddings = self.position_embedding(arange)
+
         attended = self.attention(embedding + position_embeddings)
+
         logits = self.unembed(attended)
         return logits
