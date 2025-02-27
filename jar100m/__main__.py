@@ -1,6 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
+from torch.utils.data import DataLoader, random_split
 
 from jar100m.dataset import Dataset
 from jar100m.device import device
@@ -9,7 +10,7 @@ from jar100m.model import Model
 TRAIN_SPLIT = 0.9
 CONTEXT_WINDOW_SIZE = 8
 EPOCHS = 5
-LOSS_REPORT_INTERVAL = 10000
+LOSS_REPORT_INTERVAL = 1000
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
@@ -19,6 +20,8 @@ train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
 dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
+train_data, validate_data, _ = random_split(dataset, [0.05, 0.05, 0.9])
+train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
@@ -29,9 +32,12 @@ print(f"Model has {num_params} parameters")
 for epoch in range(EPOCHS):
     total_loss = 0
 
-    for i in range(100000):
-        inp, expected_outp = dataset[i]
+    for i, (inp, expected_outp) in enumerate(train_loader):
         pred_logits = model(inp)
+
+        batches, context_size, probs = pred_logits.shape
+        pred_logits = torch.reshape(pred_logits, (batches*context_size, probs))
+        expected_outp = torch.reshape(expected_outp, (batches*context_size,))
 
         loss = F.cross_entropy(pred_logits, expected_outp)
         total_loss += loss.item()
@@ -47,13 +53,13 @@ for epoch in range(EPOCHS):
 
 def generate(sequence, n):
     for _ in range(n):
-        logits = model(sequence)[-1]
-        probs = F.softmax(logits, dim=0)
+        logits = model(sequence)[:, -1]
+        probs = F.softmax(logits, dim=1)
         next = torch.multinomial(probs, num_samples=1)
-        sequence = torch.cat((sequence, next))
+        sequence = torch.cat((sequence, next), dim=1)
 
     return sequence
 
-inp = dataset.encode("\n")
+inp = torch.stack([dataset.encode("\n")])
 outp = generate(inp, 1000)
-print(dataset.decode(outp))
+print(dataset.decode(outp[0]))

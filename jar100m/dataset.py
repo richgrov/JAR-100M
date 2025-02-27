@@ -3,7 +3,7 @@ import torch
 
 from jar100m.device import device
 
-class Dataset:
+class Dataset(torch.utils.data.Dataset):
     def __init__(self, text: str, context_window: int) -> None:
         self.id_char_map = list(set(text))
         self.char_id_map = { char: id for id, char in enumerate(self.id_char_map) }
