@@ -49,7 +49,7 @@ class Model(nn.Module):
     def forward(self, x):
         num_toks = x.shape[0]
 
-        embedding = self.info_embedding(x[-self.context_window_len:num_toks])
+        embedding = self.info_embedding(x[-self.context_window_len:])
         position_embeddings = self.position_embedding(torch.arange(min(num_toks, self.context_window_len)))
         attended = self.attention(embedding + position_embeddings)
         logits = self.unembed(attended)
