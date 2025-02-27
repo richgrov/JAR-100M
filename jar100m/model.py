@@ -24,9 +24,9 @@ class SingleHeadSelfAttention(nn.Module):
         k = self.key(x)
         q = self.query(x)
 
-        affinities = (q @ k.T) / math.sqrt(self.head_size)
+        affinities = (q @ k.transpose(1, 2)) / math.sqrt(self.head_size)
 
-        num_toks = x.shape[0]
+        num_toks = x.shape[1]
         affinity_tri = self.affinity_tri[:num_toks, :num_toks]
         decoder_affinities = affinities.masked_fill(affinity_tri, float("-inf"))
 
@@ -64,9 +64,9 @@ class Model(nn.Module):
         )
 
     def forward(self, x):
-        num_toks = x.shape[0]
+        num_toks = x.shape[1]
 
-        embedding = self.info_embedding(x[-self.context_window_len:])
+        embedding = self.info_embedding(x[:, -self.context_window_len:])
         arange = torch.arange(min(num_toks, self.context_window_len), device=device)
         position_embeddings = self.position_embedding(arange)
 
