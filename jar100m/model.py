@@ -4,7 +4,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-EMBED_DIMENSIONS = 8
+EMBED_DIMENSIONS = 16
 
 class SingleHeadSelfAttention(nn.Module):
     def __init__(self, in_size: int, head_size: int, context_window_len: int) -> None:
@@ -31,6 +31,20 @@ class SingleHeadSelfAttention(nn.Module):
         normalized = F.softmax(decoder_affinities, dim=-1)
         return normalized @ self.value(x)
 
+class MultiHeadSelfAttention(nn.Module):
+    def __init__(self, num_heads: int, in_size: int, head_size: int, context_window_len: int) -> None:
+        super().__init__()
+        self.heads = nn.ModuleList([
+            SingleHeadSelfAttention(
+                in_size=in_size,
+                head_size=head_size,
+                context_window_len=context_window_len,
+            ) for _ in range(num_heads)]
+        )
+
+    def forward(self, x) -> int:
+        return torch.cat([head(x) for head in self.heads], dim=-1)
+
 class Model(nn.Module):
     def __init__(self, vocab_len: int, context_window_len: int) -> None:
         super().__init__()
@@ -40,9 +54,10 @@ class Model(nn.Module):
         self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
         self.unembed = nn.Linear(EMBED_DIMENSIONS, vocab_len)
 
-        self.attention = SingleHeadSelfAttention(
+        self.attention = MultiHeadSelfAttention(
+            num_heads=4,
             in_size=EMBED_DIMENSIONS,
-            head_size=EMBED_DIMENSIONS,
+            head_size=EMBED_DIMENSIONS // 4,
             context_window_len=context_window_len,
         )
 
