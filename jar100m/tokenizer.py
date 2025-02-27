@@ -1,61 +1,45 @@
 class Tokenizer:
     def __init__(self, vocab: str, target_size: int):
+        self.target_size = target_size
         self.tokens_set = set(vocab)
         self.tokens_set.add('he')
         self.data = vocab
-        pass
+        self.tokens_dict = {}
+        while len(self.tokens_dict) < self.target_size:
+            self.tokens_dict = self.frequency(self.pre_tokenizer(vocab), self.tokens_dict)
+        # print(self.tokens_dict)
     
     def pre_tokenizer(self, data: str) -> list:
         data = data.split(" ")
         for string in data:
             string += " "
-        self.frequency(data, {})
-        
-    def frequency(self, words, dictionary: dict, iterations = 0):
-        iterations += 1
+        return data
+    
+    def frequency(self, words, dictionary: dict):
         dictionary
         for string in words:
             sub_dict = {}
             for char_idx in range(len(string)):
-                for char_slicer in range(char_idx, len(string)):
+                for char_slicer in range(char_idx, len(string) - 1):
                     slice = string[char_idx:char_slicer + 2]
                     if slice not in sub_dict and slice not in dictionary:
                         sub_dict[slice] = 0
                     if slice not in dictionary:
                         sub_dict[slice] += 1
-            highest: tuple[str, int] = ("", 0)
+                    if slice in dictionary:
+                        dictionary[slice] += 1
+            highest: tuple[str, int] = ("", -11)
             for combo in sub_dict:
                 if sub_dict[combo] > highest[1]:
                     highest = (combo, sub_dict[combo])
-            dictionary[highest[0]] = highest[1]
+            if highest[0] not in dictionary and highest[0] != "":
+                dictionary[highest[0]] = highest[1]
+            if highest[0] != "":
+                dictionary[highest[0]] += highest[1]
+        return dictionary
 
-        if len(dictionary) >= 100:
-            print(dictionary)
-            return
-        self.frequency(words, dictionary, iterations)
-
-
-
-    # def frequency(self):
-    #     temp = []
-    #     for i in range(len(self.data) - 1):
-    #         temp.append((self.data[i], self.data[i + 1]))
-    #     frequencies = []
-    #     already_checked = []
-    #     for i in range(len(temp)):
-    #         count = 0
-    #         for j in range(i, len(temp)):
-    #             if temp[i] == temp[j] and temp[i] not in already_checked:
-    #                 count += 1
-    #         if temp[i] not in already_checked:
-    #             already_checked.append(temp[i])
-    #             frequencies.append((temp[i], count))
-    #     print(len(temp), len(frequencies))
-    #     print(frequencies)
-    
-    def merge(self, tokens: tuple[str, str]) -> str:
-        pass
-    
 if __name__ == "__main__":
-    tokenizer = Tokenizer("hello there I want to o o o o o o o o be a cowboy baby", 100)
-    tokenizer.pre_tokenizer("hellohellohellohellohello jfhdsaoifuyasod there I want to o o o o o o o o be a cowboy baby")
+    file = open("dataset.txt")
+    data = file.read()
+    tokenizer = Tokenizer(data, 5000)
+    # tokenizer = Tokenizer("th\ne the the the thing that I made the thing is there", 100)
