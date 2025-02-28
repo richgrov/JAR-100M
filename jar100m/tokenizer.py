@@ -46,4 +46,4 @@ if __name__ == "__main__":
     with open("dataset.txt", "r", encoding="utf-8") as file:
         data = file.read()
         print(len(data))
-    tokenizer = Tokenizer(data[0:100000], 200)
+    tokenizer = Tokenizer(data[:100000], 200)
