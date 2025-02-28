@@ -54,6 +54,7 @@ class Model(nn.Module):
 
         self.info_embedding = nn.Embedding(vocab_len, EMBED_DIMENSIONS)
         self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
+        self.mlp = nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS)
         self.unembed = nn.Linear(EMBED_DIMENSIONS, vocab_len)
 
         self.attention = MultiHeadSelfAttention(
@@ -63,6 +64,7 @@ class Model(nn.Module):
             context_window_len=context_window_len,
         )
 
+
     def forward(self, x):
         num_toks = x.shape[1]
 
@@ -70,7 +72,8 @@ class Model(nn.Module):
         arange = torch.arange(min(num_toks, self.context_window_len), device=device)
         position_embeddings = self.position_embedding(arange)
 
-        attended = self.attention(embedding + position_embeddings)
-
-        logits = self.unembed(attended)
+        x = self.attention(embedding + position_embeddings)
+        x = self.mlp(x)
+        x = F.relu(x)
+        logits = self.unembed(x)
         return logits
