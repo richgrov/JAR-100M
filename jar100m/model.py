@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from jar100m.device import device
 
-EMBED_DIMENSIONS = 16
+EMBED_DIMENSIONS = 32
 
 class SingleHeadSelfAttention(nn.Module):
     def __init__(self, in_size: int, head_size: int, context_window_len: int) -> None:
