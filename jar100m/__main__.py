@@ -8,7 +8,7 @@ from jar100m.device import device
 from jar100m.model import Model
 
 TRAIN_SPLIT = 0.9
-CONTEXT_WINDOW_SIZE = 8
+CONTEXT_WINDOW_SIZE = 16
 EPOCHS = 5
 LOSS_REPORT_INTERVAL = 1000
 
@@ -20,7 +20,7 @@ train = shakespeare[:spliceIndex]
 validate = shakespeare[spliceIndex:]
 
 dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
-train_data, validate_data, _ = random_split(dataset, [0.05, 0.05, 0.9])
+train_data, validate_data, _ = random_split(dataset, [0.1, 0.1, 0.8])
 train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
