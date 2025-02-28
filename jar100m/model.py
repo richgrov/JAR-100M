@@ -47,16 +47,9 @@ class MultiHeadSelfAttention(nn.Module):
     def forward(self, x) -> int:
         return torch.cat([head(x) for head in self.heads], dim=-1)
 
-class Model(nn.Module):
-    def __init__(self, vocab_len: int, context_window_len: int) -> None:
+class TransformerBlock(nn.Module):
+    def __init__(self, context_window_len: int) -> None:
         super().__init__()
-        self.context_window_len = context_window_len
-
-        self.info_embedding = nn.Embedding(vocab_len, EMBED_DIMENSIONS)
-        self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
-        self.mlp = nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS)
-        self.unembed = nn.Linear(EMBED_DIMENSIONS, vocab_len)
-
         self.attention = MultiHeadSelfAttention(
             num_heads=4,
             in_size=EMBED_DIMENSIONS,
@@ -64,6 +57,25 @@ class Model(nn.Module):
             context_window_len=context_window_len,
         )
 
+        self.mlp = nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS)
+
+
+    def forward(self, x):
+        x = self.attention(x)
+        x = self.mlp(x)
+        x = F.relu(x)
+        return x
+
+class Model(nn.Module):
+    def __init__(self, vocab_len: int, context_window_len: int) -> None:
+        super().__init__()
+        self.context_window_len = context_window_len
+
+        self.info_embedding = nn.Embedding(vocab_len, EMBED_DIMENSIONS)
+        self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
+        self.block1 = TransformerBlock(context_window_len)
+        self.block2 = TransformerBlock(context_window_len)
+        self.unembed = nn.Linear(EMBED_DIMENSIONS, vocab_len)
 
     def forward(self, x):
         num_toks = x.shape[1]
@@ -72,8 +84,8 @@ class Model(nn.Module):
         arange = torch.arange(min(num_toks, self.context_window_len), device=device)
         position_embeddings = self.position_embedding(arange)
 
-        x = self.attention(embedding + position_embeddings)
-        x = self.mlp(x)
-        x = F.relu(x)
+        x = self.block1(embedding + position_embeddings)
+        x = self.block2(embedding + position_embeddings)
+
         logits = self.unembed(x)
         return logits
