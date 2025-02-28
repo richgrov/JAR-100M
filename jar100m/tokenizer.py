@@ -1,45 +1,49 @@
+import collections
+
 class Tokenizer:
     def __init__(self, vocab: str, target_size: int):
         self.target_size = target_size
-        self.tokens_set = set(vocab)
-        self.tokens_set.add('he')
-        self.data = vocab
         self.tokens_dict = {}
+        self.data = self.pre_tokenizer(vocab)
+
         while len(self.tokens_dict) < self.target_size:
-            self.tokens_dict = self.frequency(self.pre_tokenizer(vocab), self.tokens_dict)
-        # print(self.tokens_dict)
-    
-    def pre_tokenizer(self, data: str) -> list:
-        data = data.split(" ")
-        for string in data:
-            string += " "
-        return data
-    
-    def frequency(self, words, dictionary: dict):
-        dictionary
-        for string in words:
-            sub_dict = {}
-            for char_idx in range(len(string)):
-                for char_slicer in range(char_idx, len(string) - 1):
-                    slice = string[char_idx:char_slicer + 2]
-                    if slice not in sub_dict and slice not in dictionary:
-                        sub_dict[slice] = 0
-                    if slice not in dictionary:
-                        sub_dict[slice] += 1
-                    if slice in dictionary:
-                        dictionary[slice] += 1
-            highest: tuple[str, int] = ("", -11)
-            for combo in sub_dict:
-                if sub_dict[combo] > highest[1]:
-                    highest = (combo, sub_dict[combo])
-            if highest[0] not in dictionary and highest[0] != "":
-                dictionary[highest[0]] = highest[1]
-            if highest[0] != "":
-                dictionary[highest[0]] += highest[1]
-        return dictionary
+            pair_counts = self.count_pairs(self.data)
+            if not pair_counts:
+                break
+            
+            best_pair = max(pair_counts, key=pair_counts.get)
+            self.tokens_dict[best_pair] = len(self.tokens_dict)
+            self.data = self.merge_pairs(self.data, best_pair)
+
+        print(self.tokens_dict)
+        # print(self.data)
+
+    def pre_tokenizer(self, data: str):
+        return [" ".join(" " + word) for word in data.split()]
+
+    def count_pairs(self, words):
+        pairs = collections.defaultdict(int)
+        for word in words:
+            chars = word.split()
+            for i in range(len(chars) - 1):
+                first = chars[i]
+                # first = " " + chars[i] if i == 0 else first
+                pair = (first, chars[i + 1])
+                pairs[pair] += 1
+        return pairs
+
+    def merge_pairs(self, words, pair):
+        new_words = []
+        unmerged_token = " ".join(pair)
+        merged_token = ''.join(pair)
+        
+        for word in words:
+            word = word.replace(unmerged_token, merged_token)
+            new_words.append(word)
+        return new_words
 
 if __name__ == "__main__":
-    file = open("dataset.txt")
-    data = file.read()
-    tokenizer = Tokenizer(data, 5000)
-    # tokenizer = Tokenizer("th\ne the the the thing that I made the thing is there", 100)
+    with open("dataset.txt", "r", encoding="utf-8") as file:
+        data = file.read()
+        print(len(data))
+    tokenizer = Tokenizer(data[0:100000], 200)
