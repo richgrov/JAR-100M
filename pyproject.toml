@@ -5,6 +5,7 @@ description = "Super unique um little large language model that does shakespeare
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "matplotlib>=3.10.1",
     "numpy>=2.2.3",
     "torch>=2.6.0",
 ]
