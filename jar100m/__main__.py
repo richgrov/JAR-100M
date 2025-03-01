@@ -8,15 +8,15 @@ from jar100m.dataset import Dataset
 from jar100m.device import device
 from jar100m.model import Model
 
-CONTEXT_WINDOW_SIZE = 16
-EPOCHS = 5
-LOSS_REPORT_INTERVAL = 1000
+CONTEXT_WINDOW_SIZE = 32
+EPOCHS = 4
+LOSS_REPORT_INTERVAL = 2000
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
 
 dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
-train_data, validate_data, _ = random_split(dataset, [0.1, 0.1, 0.8])
+train_data, validate_data, _ = random_split(dataset, [0.2, 0.1, 0.7])
 train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
 validate_loader = DataLoader(validate_data, batch_size=16, shuffle=True)
 
