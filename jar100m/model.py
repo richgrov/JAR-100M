@@ -57,12 +57,16 @@ class TransformerBlock(nn.Module):
             context_window_len=context_window_len,
         )
 
-        self.mlp = nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS)
-
+        self.mlp = nn.Sequential(
+            nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS * 4),
+            nn.ReLU(),
+            nn.Linear(EMBED_DIMENSIONS * 4, EMBED_DIMENSIONS),
+            nn.ReLU(),
+        ) 
 
     def forward(self, x):
         x = x + self.attention(x)
-        x = x + F.relu(self.mlp(x))
+        x = x + self.mlp(x)
         return x
 
 class Model(nn.Module):
