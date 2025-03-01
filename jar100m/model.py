@@ -61,9 +61,8 @@ class TransformerBlock(nn.Module):
 
 
     def forward(self, x):
-        x = self.attention(x)
-        x = self.mlp(x)
-        x = F.relu(x)
+        x = x + self.attention(x)
+        x = x + F.relu(self.mlp(x))
         return x
 
 class Model(nn.Module):
@@ -73,8 +72,12 @@ class Model(nn.Module):
 
         self.info_embedding = nn.Embedding(vocab_len, EMBED_DIMENSIONS)
         self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
-        self.block1 = TransformerBlock(context_window_len)
-        self.block2 = TransformerBlock(context_window_len)
+        self.blocks = nn.Sequential(
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
+        )
+
         self.unembed = nn.Linear(EMBED_DIMENSIONS, vocab_len)
 
     def forward(self, x):
@@ -84,8 +87,7 @@ class Model(nn.Module):
         arange = torch.arange(min(num_toks, self.context_window_len), device=device)
         position_embeddings = self.position_embedding(arange)
 
-        x = self.block1(embedding + position_embeddings)
-        x = self.block2(embedding + position_embeddings)
+        x = self.blocks(embedding + position_embeddings)
 
         logits = self.unembed(x)
         return logits
