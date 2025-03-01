@@ -8,7 +8,7 @@ from jar100m.device import device
 
 EMBED_DIMENSIONS = 64
 
-class SingleHeadSelfAttention(nn.Module):
+class SelfAttentionHead(nn.Module):
     def __init__(self, in_size: int, head_size: int, context_window_len: int) -> None:
         super().__init__()
         self.head_size = head_size
@@ -37,7 +37,7 @@ class MultiHeadSelfAttention(nn.Module):
     def __init__(self, num_heads: int, in_size: int, head_size: int, context_window_len: int) -> None:
         super().__init__()
         self.heads = nn.ModuleList([
-            SingleHeadSelfAttention(
+            SelfAttentionHead(
                 in_size=in_size,
                 head_size=head_size,
                 context_window_len=context_window_len,
