@@ -24,27 +24,39 @@ optimizer = Adam(model.parameters(), lr=0.001)
 num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Model has {num_params} parameters")
 
+def cross_entropy_loss(logits, classes):
+    batches, context_size, probs = logits.shape
+    logits = torch.reshape(logits, (batches*context_size, probs))
+    classes = torch.reshape(classes, (batches*context_size,))
+    return F.cross_entropy(logits, classes)
+
+def validate():
+    total_loss = 0
+
+    with torch.no_grad():
+        for inp, expected_outp in validate_loader:
+            pred_logits = model(inp)
+            total_loss += cross_entropy_loss(pred_logits, expected_outp)
+
+    return total_loss / len(validate_loader)
+
 for epoch in range(EPOCHS):
     total_loss = 0
 
     for i, (inp, expected_outp) in enumerate(train_loader):
         pred_logits = model(inp)
-
-        batches, context_size, probs = pred_logits.shape
-        pred_logits = torch.reshape(pred_logits, (batches*context_size, probs))
-        expected_outp = torch.reshape(expected_outp, (batches*context_size,))
-
-        loss = F.cross_entropy(pred_logits, expected_outp)
+        loss = cross_entropy_loss(pred_logits, expected_outp)
         total_loss += loss.item()
-
-        if i % LOSS_REPORT_INTERVAL == 0 and i > 0:
-            average_loss = total_loss / LOSS_REPORT_INTERVAL
-            print(f"Epoch {epoch}, step {i}: loss {average_loss}")
-            total_loss = 0
 
         model.zero_grad()
         loss.backward()
         optimizer.step()
+
+        if i % LOSS_REPORT_INTERVAL == 0 and i > 0:
+            average_loss = total_loss / LOSS_REPORT_INTERVAL
+            validate_loss = validate()
+            print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}")
+            total_loss = 0
 
 def generate(sequence, n):
     for _ in range(n):
