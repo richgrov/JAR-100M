@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
+import matplotlib.pyplot as plt
 
 from jar100m.dataset import Dataset
 from jar100m.device import device
@@ -17,6 +18,10 @@ with open("dataset.txt", 'r') as file:
 dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
 train_data, validate_data, _ = random_split(dataset, [0.1, 0.1, 0.8])
 train_loader = DataLoader(train_data, batch_size=16, shuffle=True)
+validate_loader = DataLoader(validate_data, batch_size=16, shuffle=True)
+
+train_loss_history = []
+validate_loss_history = []
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
 optimizer = Adam(model.parameters(), lr=0.001)
@@ -56,6 +61,8 @@ for epoch in range(EPOCHS):
             average_loss = total_loss / LOSS_REPORT_INTERVAL
             validate_loss = validate()
             print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}")
+            train_loss_history.append(average_loss)
+            validate_loss_history.append(validate_loss)
             total_loss = 0
 
 def generate(sequence, n):
@@ -70,3 +77,8 @@ def generate(sequence, n):
 inp = torch.stack([dataset.encode("\n")])
 outp = generate(inp, 1000)
 print(dataset.decode(outp[0]))
+
+plt.plot(train_loss_history, label="Train loss")
+plt.plot(validate_loss_history, label="Validate loss")
+plt.legend()
+plt.show()
