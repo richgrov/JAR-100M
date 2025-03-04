@@ -1,1 +1,7 @@
 __pycache__/
+
+.DS_Store
+
+extension/jar-lsp/node_modules/
+extension/jar-lsp/out/
+extension/jar-lsp/.vscode/
