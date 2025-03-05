@@ -42,8 +42,26 @@ class Tokenizer:
             new_words.append(word)
         return new_words
 
-if __name__ == "__main__":
-    with open("dataset.txt", "r", encoding="utf-8") as file:
+def token(file_path: str):
+    with open(file_path, "rb") as file:
         data = file.read()
-        print(len(data))
-    tokenizer = Tokenizer(data[:100000], 200)
+    tokens = collections.defaultdict(int)
+    text = data.split(b"\0")
+    text = [t.decode('utf-8') for t in text]
+    text.pop()
+    i = 0
+    while i < int(len(text)):
+        tokens[(text[i], text[i + 1])] = int(i / 2)
+        i += 2
+    for token in tokens:
+        print(token, tokens[token])
+
+
+if __name__ == "__main__":
+    # with open("dataset.txt", "r", encoding="utf-8") as file:
+    #     data = file.read()
+    #     print(len(data))
+    # tokenizer = Tokenizer(data, 25)
+
+    token("../Tokenizer/Tokenizer/tokens.bin")
+
