@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from jar100m.device import device
 
-EMBED_DIMENSIONS = 64
+EMBED_DIMENSIONS = 128
 
 class SelfAttentionHead(nn.Module):
     def __init__(self, in_size: int, head_size: int, context_window_len: int) -> None:
@@ -58,9 +58,9 @@ class TransformerBlock(nn.Module):
         )
 
         self.mlp = nn.Sequential(
-            nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS * 4),
+            nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS * 2),
             nn.ReLU(),
-            nn.Linear(EMBED_DIMENSIONS * 4, EMBED_DIMENSIONS),
+            nn.Linear(EMBED_DIMENSIONS * 2, EMBED_DIMENSIONS),
             nn.ReLU(),
         ) 
 

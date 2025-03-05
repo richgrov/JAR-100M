@@ -8,9 +8,9 @@ from jar100m.dataset import Dataset
 from jar100m.device import device
 from jar100m.model import Model
 
-CONTEXT_WINDOW_SIZE = 32
+CONTEXT_WINDOW_SIZE = 64
 EPOCHS = 4
-LOSS_REPORT_INTERVAL = 2000
+LOSS_REPORT_INTERVAL = 10
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
