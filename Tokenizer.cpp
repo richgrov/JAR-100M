@@ -97,9 +97,10 @@ TokenPair Tokenizer::find_max(const tuples_map &tuples) {
 }
 
 void Tokenizer::merge_pair(TokenPair pair, std::vector<Token> &words) {
-  uint16_t left = pair >> 16;
-  uint16_t right = pair & 0xFFFF;
-  uint32_t merged_id = get_id(_inv_vocab[left] + _inv_vocab[right]);
+  Token left = pair >> 16;
+  Token right = pair & 0xFFFF;
+  Token merged_id = _inv_vocab.size();
+  _inv_vocab.emplace_back(_inv_vocab[left] + _inv_vocab[right]);
 
   size_t write_index = 0;
   for (size_t i = 0; i < words.size() - 1; i++, write_index++) {
