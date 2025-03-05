@@ -26,7 +26,6 @@ private:
   std::vector<TokenPair> _tokens;
   std::map<std::string, Token> _vocab;
   std::map<Token, std::string> _inv_vocab;
-  int _next_id;
 
   word split_word(const std::string &_word);
   std::vector<Token> pre_tokenizer(const std::string &data);
@@ -37,7 +36,7 @@ private:
 };
 
 Tokenizer::Tokenizer(int target_size, const std::string &data)
-    : _target_size(target_size), _next_id(0) {
+    : _target_size(target_size) {
   auto begin = timing::steady_clock::now();
   _data_tokenized = pre_tokenizer(data);
 
@@ -124,7 +123,7 @@ void Tokenizer::merge_pair(TokenPair pair, std::vector<Token> &words) {
 Token Tokenizer::get_id(const std::string &token) {
   auto it = _vocab.find(token);
   if (it == _vocab.end()) {
-    Token id = _next_id++;
+    Token id = _vocab.size();
     _vocab[token] = id;
     _inv_vocab[id] = token;
     return id;
