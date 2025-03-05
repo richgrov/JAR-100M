@@ -10,7 +10,7 @@ from jar100m.device import device
 from jar100m.model import Model
 
 CONTEXT_WINDOW_SIZE = 64
-EPOCHS = 4
+EPOCHS = 3
 LOSS_REPORT_INTERVAL = 10
 
 with open("dataset.txt", 'r') as file:
@@ -69,6 +69,8 @@ for epoch in range(EPOCHS):
             validate_loss_history.append(validate_loss)
             total_loss = 0
             timestamp = now
+
+    torch.save(model.state_dict(), f"model-{epoch}.pt")
 
 def generate(sequence, n):
     for _ in range(n):
