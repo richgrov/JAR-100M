@@ -25,7 +25,7 @@ private:
   std::vector<Token> _data_tokenized;
   std::vector<TokenPair> _tokens;
   std::map<std::string, Token> _vocab;
-  std::map<Token, std::string> _inv_vocab;
+  std::vector<std::string> _inv_vocab;
 
   word split_word(const std::string &_word);
   std::vector<Token> pre_tokenizer(const std::string &data);
@@ -125,7 +125,7 @@ Token Tokenizer::get_id(const std::string &token) {
   if (it == _vocab.end()) {
     Token id = _vocab.size();
     _vocab[token] = id;
-    _inv_vocab[id] = token;
+    _inv_vocab.emplace_back(token);
     return id;
   }
   return it->second;
