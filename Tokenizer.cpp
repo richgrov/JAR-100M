@@ -13,7 +13,6 @@ using TokenPair = uint32_t;
 
 namespace timing = std::chrono;
 using tuples_map = std::unordered_map<TokenPair, Token>;
-using word = std::vector<int>;
 
 class Tokenizer {
 public:
@@ -74,10 +73,8 @@ Tokenizer::Tokenizer(int target_size, const std::string &data)
 Tokenizer::~Tokenizer() {}
 
 std::vector<Token> Tokenizer::pre_tokenizer(const std::string &data) {
-  std::string _word;
   std::vector<Token> tokens_fully_split;
 
-  word chars_split;
   for (char c : data) {
     tokens_fully_split.emplace_back(get_id(std::string(1, c)));
   }
