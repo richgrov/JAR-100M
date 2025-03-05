@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
+import time
 
 from jar100m.dataset import Dataset
 from jar100m.device import device
@@ -47,6 +48,7 @@ def validate():
 
 for epoch in range(EPOCHS):
     total_loss = 0
+    timestamp = time.monotonic()
 
     for i, (inp, expected_outp) in enumerate(train_loader):
         pred_logits = model(inp)
@@ -58,12 +60,15 @@ for epoch in range(EPOCHS):
         optimizer.step()
 
         if i % LOSS_REPORT_INTERVAL == 0 and i > 0:
+            now = time.monotonic()
+
             average_loss = total_loss / LOSS_REPORT_INTERVAL
             validate_loss = validate()
-            print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}")
+            print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}, elapsed {now - timestamp:.2f}s")
             train_loss_history.append(average_loss)
             validate_loss_history.append(validate_loss)
             total_loss = 0
+            timestamp = now
 
 def generate(sequence, n):
     for _ in range(n):
