@@ -1,9 +1,31 @@
-import pandas as pd
+from typing import Tuple
+import torch
 
-for i in range(27):
-    df = pd.read_parquet(f"dataset/train-{i:05}-of-00027.parquet")
-    print(f"Writing {i:03}")
-    with open(f"dataset/{i:03}.txt", "w") as file:
-        for source in df["content"]:
-            file.write(source)
-        
+from jar100m.device import device
+
+class Dataset(torch.utils.data.Dataset):
+    def __init__(self, text: str, context_window: int) -> None:
+        self.id_char_map = list(set(text))
+        self.char_id_map = { char: id for id, char in enumerate(self.id_char_map) }
+
+        self.encoded_text = self.encode(text)
+        self.context_window = context_window
+
+    def encode(self, text: str) -> torch.Tensor:
+        return torch.tensor([self.char_id_map[char] for char in text], device=device)
+
+    def decode(self, ids) -> str:
+        return "".join([self.id_char_map[id] for id in ids])
+
+    @property
+    def vocab(self):
+        return self.id_char_map
+
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
+        inp = self.encoded_text[index:index+self.context_window]
+        outp = self.encoded_text[index+1:index+1+self.context_window]
+        return inp, outp
+
+    def __len__(self):
+        return len(self.encoded_text) - self.context_window
+
