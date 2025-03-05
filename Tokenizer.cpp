@@ -27,7 +27,6 @@ private:
   std::map<std::string, Token> _vocab;
   std::vector<std::string> _inv_vocab;
 
-  word split_word(const std::string &_word);
   std::vector<Token> pre_tokenizer(const std::string &data);
   tuples_map count_pairs(const std::vector<Token> &data);
   TokenPair find_max(const tuples_map &tuples);
@@ -84,8 +83,6 @@ std::vector<Token> Tokenizer::pre_tokenizer(const std::string &data) {
   }
   return tokens_fully_split;
 }
-
-word Tokenizer::split_word(const std::string &_word) {}
 
 tuples_map Tokenizer::count_pairs(const std::vector<Token> &data) {
   tuples_map pairs;
