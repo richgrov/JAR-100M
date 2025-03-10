@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 from jar100m.dataset import Dataset
 from jar100m.model import Model
 
-CONTEXT_WINDOW_SIZE = 32
-EPOCHS = 1
+CONTEXT_WINDOW_SIZE = 64
+EPOCHS = 32
 LOSS_REPORT_INTERVAL = 2000
 BATCH_SIZE = 16
 

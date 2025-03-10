@@ -3,7 +3,7 @@ import jax.numpy as jnp
 import equinox as eqx
 import math
 
-EMBED_DIMENSIONS = 64
+EMBED_DIMENSIONS = 72
 
 class SelfAttentionHead(eqx.Module):
     query: eqx.nn.Linear
