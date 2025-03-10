@@ -57,7 +57,7 @@ def main():
     model_key, train_key = jax.random.split(key)
     
     model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE, model_key)
-    model = eqx.filter_vmap(model)
+    model = eqx.filter_jit(eqx.filter_vmap(model))
     optimizer = optax.adam(0.001)
     opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
 
