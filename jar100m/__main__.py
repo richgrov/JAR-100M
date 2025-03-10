@@ -8,7 +8,7 @@ from jar100m.dataset import Dataset
 from jar100m.model import Model
 
 CONTEXT_WINDOW_SIZE = 64
-EPOCHS = 32
+EPOCHS = 8
 LOSS_REPORT_INTERVAL = 2000
 BATCH_SIZE = 16
 
