@@ -1,3 +1,5 @@
+import sys
+
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
@@ -25,6 +27,12 @@ train_loss_history = []
 validate_loss_history = []
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
+
+if len(sys.argv) > 1:
+    model.load_state_dict(torch.load(sys.argv[1], map_location=device))
+    EPOCHS = 0
+    model.eval()
+
 optimizer = Adam(model.parameters(), lr=0.001)
 
 num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
