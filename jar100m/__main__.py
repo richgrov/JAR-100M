@@ -35,21 +35,13 @@ def validate(model, dataset, indices):
     inp, expected_outp = get_batch(dataset, indices)
     return compute_loss(model, inp, expected_outp)
 
-def generate(model, sequence, n, key):
-    for _ in range(n):
-        logits = model(sequence)[:, -1]
-        key, subkey = jax.random.split(key)
-        next_token = jax.random.categorical(subkey, logits)
-        sequence = jnp.concatenate([sequence, next_token[None, :]], axis=1)
-    return sequence
-
 def count_parameters(model):
     params = eqx.filter(model, eqx.is_array)
     total_params = sum(p.size for p in jax.tree_util.tree_leaves(params))
     return total_params
 
 def main():
-    with open("dataset.txt", 'r') as file:
+    with open("dataset2.txt", 'r') as file:
         shakespeare = file.read()
 
     dataset = Dataset(shakespeare, CONTEXT_WINDOW_SIZE)
@@ -64,8 +56,8 @@ def main():
     num_params = count_parameters(model)
     print(f"Model has {num_params} parameters")
 
-    train_size = int(0.002 * len(dataset))
-    val_size = int(0.01 * len(dataset))
+    train_size = int(0.2 * len(dataset))
+    val_size = int(0.1 * len(dataset))
     train_indices = jax.random.permutation(train_key, train_size)
     val_indices = jax.random.permutation(train_key, val_size)
 
@@ -93,10 +85,15 @@ def main():
                 validate_loss_history.append(val_loss.item())
                 total_loss = 0
 
-    # Generate text
-    inp = dataset.encode("\n")[None, :]
-    outp = generate(model, inp, 1000, jax.random.PRNGKey(42))
-    print(dataset.decode(outp[0]))
+    sequence = dataset.encode("\n")[None, :]
+    gen_key = jax.random.PRNGKey(42)
+
+    for _ in range(1000):
+        logits = model(sequence)[:, -1]
+        gen_key, subkey = jax.random.split(gen_key)
+        next_token = jax.random.categorical(subkey, logits)
+        print(dataset.decode(next_token), end="", flush=True)
+        sequence = jnp.concatenate([sequence, next_token[None, :]], axis=1)
 
     plt.plot(train_loss_history, label="Train loss")
     plt.plot(validate_loss_history, label="Validate loss")
