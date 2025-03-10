@@ -1,16 +1,19 @@
+import sys
+
 import torch
 import torch.nn.functional as F
 from torch.optim import Adam
 from torch.utils.data import DataLoader, random_split
 import matplotlib.pyplot as plt
+import time
 
 from jar100m.dataset import Dataset
 from jar100m.device import device
 from jar100m.model import Model
 
-CONTEXT_WINDOW_SIZE = 32
-EPOCHS = 4
-LOSS_REPORT_INTERVAL = 2000
+CONTEXT_WINDOW_SIZE = 64
+EPOCHS = 3
+LOSS_REPORT_INTERVAL = 10
 
 with open("dataset.txt", 'r') as file:
     shakespeare = file.read()
@@ -24,6 +27,12 @@ train_loss_history = []
 validate_loss_history = []
 
 model = Model(len(dataset.vocab), CONTEXT_WINDOW_SIZE).to(device)
+
+if len(sys.argv) > 1:
+    model.load_state_dict(torch.load(sys.argv[1], map_location=device))
+    EPOCHS = 0
+    model.eval()
+
 optimizer = Adam(model.parameters(), lr=0.001)
 
 num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -47,6 +56,7 @@ def validate():
 
 for epoch in range(EPOCHS):
     total_loss = 0
+    timestamp = time.monotonic()
 
     for i, (inp, expected_outp) in enumerate(train_loader):
         pred_logits = model(inp)
@@ -58,12 +68,17 @@ for epoch in range(EPOCHS):
         optimizer.step()
 
         if i % LOSS_REPORT_INTERVAL == 0 and i > 0:
+            now = time.monotonic()
+
             average_loss = total_loss / LOSS_REPORT_INTERVAL
             validate_loss = validate()
-            print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}")
+            print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}, elapsed {now - timestamp:.2f}s")
             train_loss_history.append(average_loss)
             validate_loss_history.append(validate_loss)
             total_loss = 0
+            timestamp = now
+
+    torch.save(model.state_dict(), f"model-{epoch}.pt")
 
 def generate(sequence, n):
     for _ in range(n):
