@@ -33,6 +33,12 @@ private:
   Token get_id(const std::string &token);
 };
 
+Token get_left(TokenPair pair) { return pair >> 16; }
+
+Token get_right(TokenPair pair) { return pair & 0xFFFF; }
+
+TokenPair to_pair(Token left, Token right) { return left << 16 | right; }
+
 Tokenizer::Tokenizer(int target_size, const std::string &data)
     : _target_size(target_size) {
   auto begin = timing::steady_clock::now();
@@ -55,10 +61,8 @@ Tokenizer::Tokenizer(int target_size, const std::string &data)
   std::ofstream token_file;
   token_file.open("tokens.bin", std::ios::binary);
   for (const auto &token : _tokens) {
-    token_file << _inv_vocab[token >> 16]
-               << std::string(1, static_cast<char>(0))
-               << _inv_vocab[token & 0xFFFF]
-               << std::string(1, static_cast<char>(0));
+    token_file << _inv_vocab[get_left(token)] << '\0'
+               << _inv_vocab[get_right(token)] << '\0';
   }
   token_file.close();
   auto finish = timing::steady_clock::now();
@@ -84,7 +88,8 @@ std::vector<Token> Tokenizer::pre_tokenizer(const std::string &data) {
 tuples_map Tokenizer::count_pairs(const std::vector<Token> &data) {
   tuples_map pairs;
   for (size_t i = 0; i < data.size() - 1; i++) {
-    pairs[data[i] << 16 | data[i + 1]]++;
+    TokenPair pair = to_pair(data[i], data[i + 1]);
+    pairs[pair]++;
   }
   return pairs;
 }
@@ -97,14 +102,14 @@ TokenPair Tokenizer::find_max(const tuples_map &tuples) {
 }
 
 void Tokenizer::merge_pair(TokenPair pair, std::vector<Token> &words) {
-  Token left = pair >> 16;
-  Token right = pair & 0xFFFF;
+  Token left = get_left(pair);
+  Token right = get_right(pair);
   Token merged_id = _inv_vocab.size();
   _inv_vocab.emplace_back(_inv_vocab[left] + _inv_vocab[right]);
 
   size_t write_index = 0;
   for (size_t i = 0; i < words.size() - 1; i++, write_index++) {
-    if ((words[i] << 16 | words[i + 1]) == pair) {
+    if (to_pair(words[i], words[i + 1]) == pair) {
       words[write_index] = merged_id;
       i++;
     } else {
