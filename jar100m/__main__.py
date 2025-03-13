@@ -74,7 +74,7 @@ for epoch in range(EPOCHS):
             validate_loss = validate()
             print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}, elapsed {now - timestamp:.2f}s")
             train_loss_history.append(average_loss)
-            validate_loss_history.append(validate_loss)
+            validate_loss_history.append(validate_loss.cpu())
             total_loss = 0
             timestamp = now
 
