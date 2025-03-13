@@ -11,8 +11,8 @@ from jar100m.dataset import Dataset
 from jar100m.device import device
 from jar100m.model import Model
 
-CONTEXT_WINDOW_SIZE = 64
-EPOCHS = 3
+CONTEXT_WINDOW_SIZE = 512
+EPOCHS = 2
 LOSS_REPORT_INTERVAL = 10
 
 with open("dataset.txt", 'r') as file:
@@ -33,7 +33,7 @@ if len(sys.argv) > 1:
     EPOCHS = 0
     model.eval()
 
-optimizer = Adam(model.parameters(), lr=0.001)
+optimizer = Adam(model.parameters(), lr=0.0001)
 
 num_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Model has {num_params} parameters")
@@ -74,7 +74,7 @@ for epoch in range(EPOCHS):
             validate_loss = validate()
             print(f"Epoch {epoch}, step {i}: train loss {average_loss}, validate loss {validate_loss}, elapsed {now - timestamp:.2f}s")
             train_loss_history.append(average_loss)
-            validate_loss_history.append(validate_loss)
+            validate_loss_history.append(validate_loss.cpu())
             total_loss = 0
             timestamp = now
 

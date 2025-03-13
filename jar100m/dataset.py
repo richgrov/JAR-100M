@@ -5,7 +5,7 @@ from jar100m.device import device
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, text: str, context_window: int) -> None:
-        self.id_char_map = list(set(text))
+        self.id_char_map = sorted(list(set(text)))
         self.char_id_map = { char: id for id, char in enumerate(self.id_char_map) }
 
         self.encoded_text = self.encode(text)
@@ -28,4 +28,3 @@ class Dataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.encoded_text) - self.context_window
-

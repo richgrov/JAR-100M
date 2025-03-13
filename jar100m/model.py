@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 from jar100m.device import device
 
-EMBED_DIMENSIONS = 128
+EMBED_DIMENSIONS = 1024
 
 class SelfAttentionHead(nn.Module):
     def __init__(self, in_size: int, head_size: int, context_window_len: int) -> None:
@@ -51,16 +51,16 @@ class TransformerBlock(nn.Module):
     def __init__(self, context_window_len: int) -> None:
         super().__init__()
         self.attention = MultiHeadSelfAttention(
-            num_heads=4,
+            num_heads=16,
             in_size=EMBED_DIMENSIONS,
-            head_size=EMBED_DIMENSIONS // 4,
+            head_size=EMBED_DIMENSIONS // 16,
             context_window_len=context_window_len,
         )
 
         self.mlp = nn.Sequential(
-            nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS * 2),
+            nn.Linear(EMBED_DIMENSIONS, EMBED_DIMENSIONS * 4),
             nn.ReLU(),
-            nn.Linear(EMBED_DIMENSIONS * 2, EMBED_DIMENSIONS),
+            nn.Linear(EMBED_DIMENSIONS * 4, EMBED_DIMENSIONS),
             nn.ReLU(),
         ) 
 
@@ -77,6 +77,11 @@ class Model(nn.Module):
         self.info_embedding = nn.Embedding(vocab_len, EMBED_DIMENSIONS)
         self.position_embedding = nn.Embedding(context_window_len, EMBED_DIMENSIONS)
         self.blocks = nn.Sequential(
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
+            TransformerBlock(context_window_len),
             TransformerBlock(context_window_len),
             TransformerBlock(context_window_len),
             TransformerBlock(context_window_len),
